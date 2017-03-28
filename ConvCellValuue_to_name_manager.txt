@@ -1,0 +1,77 @@
+Attribute VB_Name = "Module1"
+Sub SaveRefGenList()
+Attribute SaveRefGenList.VB_ProcData.VB_Invoke_Func = "S\n14"
+
+Dim start_row As Integer
+Dim start_column As Integer
+
+code = "RBIF8"
+code_len = Len(code)
+
+n = Worksheets.Count
+
+For k = 1 To n
+    If Worksheets(k).Name = "RefList" Then
+        Application.DisplayAlerts = False
+        Worksheets(k).Delete
+        Application.DisplayAlerts = True
+    End If
+Next k
+
+n = Worksheets.Count
+
+Worksheets.Add(After:=Worksheets(n)).Name = "RefList"
+Worksheets("RefList").Cells(1, 1).Value = "References"
+Worksheets("RefList").Cells(1, 2).Value = "Sheet name"
+Worksheets("RefList").Cells(1, 3).Value = "Corresp cell"
+
+incr = 2
+
+For k = 1 To n
+    verif = 0
+    For j1 = 1 To 5
+        For j2 = 1 To 5
+            If Left(Worksheets(k).Cells(j1, j2).Value, code_len) = code Then
+                start_row = Worksheets(k).Cells(j1, j2).Row
+                start_column = Worksheets(k).Cells(j1, j2).Column
+                verif = 1
+                j1 = 6
+                j2 = 6
+            End If
+        Next j2
+    Next j1
+    
+    If verif = 1 Then
+        final_column = Worksheets(k).Cells(start_row, 1000).End(xlToLeft).Column
+        final_row = Worksheets(k).Cells(10000, start_column).End(xlUp).Row
+    Else
+        final_column = 1
+        final_row = 1
+    End If
+    
+    For j1 = start_row + 1 To final_row
+        For j2 = start_column + 1 To final_column
+            If Left(Worksheets(k).Cells(j1, j2).Value, code_len) = code Or Mid(Worksheets(k).Cells(j1, j2).Value, 1, 1) = "_" Then
+                'add cell content to Name Manager
+                ActiveWorkbook.Names.Add Name:=Worksheets(k).Cells(j1, j2).Value, RefersToR1C1:=Worksheets(k).Cells(j1, j2)
+                'add cell content to RefList list
+                Worksheets("RefList").Cells(incr, 1).Value = Worksheets(k).Cells(j1, j2).Value
+                Worksheets("RefList").Cells(incr, 2).Value = Worksheets(k).Name
+                
+                col_nr = j2
+                s = ""
+                Do
+                    c = ((col_nr - 1) Mod 26)
+                    s = Chr(c + 65) & s
+                    col_nr = (col_nr - c) \ 26
+                Loop While col_nr > 0
+                col_letter = s
+                
+                Worksheets("RefList").Cells(incr, 3).Value = col_letter & j1
+                incr = incr + 1
+            End If
+        Next j2
+    Next j1
+Next k
+
+End Sub

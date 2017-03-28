@@ -1,0 +1,1 @@
+C:\Users\Psam Elyon>\\ldn-sysmng-a\source\apps\o3652016\setup.exe /configure \\ldn-sysmng-\source\apps\o3652016\noskypeforbusiness.xml

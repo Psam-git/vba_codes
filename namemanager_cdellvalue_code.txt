@@ -1,0 +1,99 @@
+Sub Test()
+ActiveWorkbook.Sheets.Add before:=Sheets(1)
+ActiveSheet.Name = "P0"
+
+Set nms = ActiveWorkbook.Names
+Set wks = ActiveWorkbook.Sheets(1)
+For R = 2 To nms.Count
+    wks.Cells(R, 1).Value = nms(R).Name
+    wks.Cells(R, 2).Value = nms(R).RefersToLocal
+    'wks.Cells(r, 3).Value = wks.Cells(r, 3).fo
+    On Error Resume Next
+Application.Goto ActiveWorkbook.Sheets(1).Cells(R, 1)
+Next
+
+Dim tbl As Object
+Dim RowRef As Integer
+Dim ColRef As String
+
+i = 1
+Do While i < ActiveWorkbook.Sheets(1).UsedRange.Rows.Count + 2
+Cells(i, 2).Value = Right(Cells(i, 2).Formula, Len(Cells(i, 2).Formula) - 1)
+n = InStr(Cells(i, 2), "!")
+Cells(i, 3) = Left(Cells(i, 2), n - 1)
+Cells(i, 3) = Replace(Cells(i, 3), "'", "")
+If Cells(i, 4) = "" Then
+Cells(i, 4) = Right(Cells(i, 2), Len(Cells(i, 2)) - n)
+Cells(i, 4) = Replace(Cells(i, 4), "$", "")
+End If
+
+If InStr(1, Cells(i, 2), "[C") <> "0" Or InStr(1, Cells(i, 2), "[R") <> "0" Then
+Cells(i, 2).Value = Left(Cells(i, 2), InStr(1, Cells(i, 2), "[C") - 1)
+Cells(i, 2).Value = Left(Cells(i, 2), InStr(1, Cells(i, 2), "[R") - 1)
+For Each WS In Worksheets
+    For Each tbl In WS.ListObjects
+    If tbl = Cells(i, 2).Value Then Cells(i, 3) = WS.Name
+    Next tbl
+Next WS
+End If
+i = i + 1
+'Application.Goto Cells(i, 4)
+Loop
+
+i = 1
+Do While i < ActiveWorkbook.Sheets(1).UsedRange.Rows.Count + 2
+If InStr(1, Cells(i, 4), "[C") <> "0" Or InStr(1, Cells(i, 4), "[R") <> "0" Then
+For Each WS In Worksheets
+    For Each tbl In WS.ListObjects
+    If tbl = Cells(i, 2).Value And Cells(i, 5) = "" Then
+    For k = 1 To tbl.Range.Columns.Count
+    WorkS = WS.Name
+    tabl = Cells(i, 2).Value
+        RowRef = Worksheets(WorkS).ListObjects(tabl).DataBodyRange(1, k).Row
+        ColRef = Left(Worksheets(WorkS).ListObjects(tabl).DataBodyRange(1, k).Address(1, 0), InStr(1, Worksheets(WorkS).ListObjects(tabl).DataBodyRange(1, k).Address(1, 0), "$") - 1)
+        Cells(i - 1 + k, 5).Value = ColRef & RowRef
+        If Cells(i, 5).Value <> "" Then
+        If Left(Cells(i, 4), InStr(1, Cells(i, 4), "[C") - 1) = Cells(i, 2).Value Then
+        If k = 1 Then
+        Cells(i + tbl.Range.Columns.Count, 4).Value = Cells(i, 5)
+        Cells(i + tbl.Range.Columns.Count - 1, 4).Value = Cells(i, 5)
+        Else
+        Cells(i + k - 2, 4).Value = Cells(i + k - 1, 5)
+        End If
+        End If
+        End If
+    Next k
+    End If
+    Next tbl
+Next WS
+End If
+Columns(5).ClearContents
+i = i + 1
+Application.Goto Cells(i, 4)
+Loop
+
+i = 2
+Do While i < Sheets(1).UsedRange.Column + 2
+Worksheets(Cells(i, 3)).Value = Sheets(1).Cells(i, 2).Value
+Cells(i, 3) = Left(Cells(i, 2), n - 1)
+Cells(i, 4) = Right(Cells(i, 2), Len(Cells(i, 2)) - n)
+Cells(i, 4) = Replace(Cells(i, 4), "$", "")
+i = i + 1
+Loop
+
+i = 2
+Do While i < Sheets(1).UsedRange.Rows.Count + 2
+
+Sheets(Cells(i, 3).Text).Range(Cells(i, 4).Text).Value = Sheets(1).Cells(i, 1).Value
+Sheets(Cells(i, 3).Text).Range(Cells(i, 4).Text).Font.Color = RGB(0, 0, 255)
+If InStr(1, Cells(i, 2), "GRD") <> "0" Then Sheets(Cells(i, 3).Text).Range(Cells(i, 4).Text).Interior.Color = RGB(255, 217, 102)
+i = i + 1
+Loop
+
+
+Application.DisplayAlerts = False
+Sheets(1).Delete
+Application.DisplayAlerts = True
+
+
+End Sub

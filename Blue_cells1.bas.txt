@@ -1,0 +1,49 @@
+Attribute VB_Name = "Module1"
+Sub BlueCells()
+Attribute BlueCells.VB_ProcData.VB_Invoke_Func = "B\n14"
+
+Dim start_row As Integer
+Dim start_column As Integer
+
+code = "RBIDBSROR"
+code_len = Len(code)
+
+lColor = RGB(153, 204, 255)
+
+n = Worksheets.Count
+
+For k = 1 To n
+    verif = 0
+    For j1 = 1 To 5
+        For j2 = 1 To 5
+            If Left(Worksheets(k).Cells(j1, j2).Value, code_len) = code Then
+                start_row = Worksheets(k).Cells(j1, j2).Row
+                start_column = Worksheets(k).Cells(j1, j2).Column
+                verif = 1
+                j1 = 6
+                j2 = 6
+            End If
+        Next j2
+    Next j1
+    
+    If verif = 1 Then
+        final_column = Worksheets(k).Cells(start_row, 1000).End(xlToLeft).Column
+        final_row = Worksheets(k).Cells(10000, start_column).End(xlUp).Row
+    Else
+        final_column = 1
+        final_row = 1
+    End If
+    
+    For j1 = start_row + 1 To final_row
+        For j2 = start_column + 1 To final_column
+            Formula = ""
+            If Worksheets(k).Cells(j1, j2).Interior.Color = lColor Then
+                Formula = Worksheets(k).Cells(j1, j2).Formula
+                changed_formula = Left(Formula, Len(Formula) - 1) & "," & Chr(34) & "SUM" & Chr(34) & ")"
+                Worksheets(k).Cells(j1, j2).Formula = changed_formula
+            End If
+        Next j2
+    Next j1
+Next k
+    
+End Sub

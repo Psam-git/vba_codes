@@ -1,0 +1,7 @@
+Sub population()
+Dim LRandomNumber As Long
+For Each mycell In Selection
+    LRandomNumber = Int(300 * Rnd + 200) * 10000
+    mycell.Value = LRandomNumber
+Next mycell
+End Sub
